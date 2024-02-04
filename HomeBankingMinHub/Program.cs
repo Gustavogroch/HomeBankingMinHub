@@ -1,4 +1,5 @@
 using HomeBankingMinHub.Models;
+using HomeBankingMinHub.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +10,7 @@ builder.Services.AddRazorPages();
 // Add Dbcontext.
 
 builder.Services.AddDbContext<HomeBankingContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("HomeBankingConexion")));
-
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
 var app = builder.Build();
 
 // create scope
@@ -33,5 +34,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.MapControllers();
 
 app.Run();

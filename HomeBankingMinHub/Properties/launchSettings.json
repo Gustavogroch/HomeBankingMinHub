@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "http": {
+    "HomeBanking": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
