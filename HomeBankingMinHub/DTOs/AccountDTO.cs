@@ -1,4 +1,6 @@
-﻿namespace HomeBankingMinHub.DTOs
+﻿using System.Transactions;
+
+namespace HomeBankingMinHub.DTOs
 {
     public class AccountDTO
     {
@@ -9,5 +11,6 @@
         public DateTime CreationDate { get; set; }
 
         public double Balance { get; set; }
+        public ICollection<TransactionDTO> Transactions { get; set; }
     }
 }

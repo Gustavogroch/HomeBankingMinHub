@@ -34,21 +34,14 @@ namespace HomeBankingMinHub.Controllers
             {
 
                 var clients = _clientRepository.GetAllClients();
-
-
-
                 var clientsDTO = new List<ClientDTO>();
-
-
 
                 foreach (Client client in clients)
 
                 {
-
                     var newClientDTO = new ClientDTO
 
                     {
-
                         Id = client.Id,
 
                         Email = client.Email,
@@ -78,19 +71,11 @@ namespace HomeBankingMinHub.Controllers
                     clientsDTO.Add(newClientDTO);
 
                 }
-
-
-
-
-
                 return Ok(clientsDTO);
 
             }
-
             catch (Exception ex)
-
             {
-
                 return StatusCode(500, ex.Message);
 
             }

@@ -11,6 +11,7 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<HomeBankingContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("HomeBankingConexion")));
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 var app = builder.Build();
 
 // create scope
@@ -27,6 +28,10 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
 }
+app.UseDefaultFiles();
+
+app.UseStaticFiles();
+
 app.UseStaticFiles();
 
 app.UseRouting();
