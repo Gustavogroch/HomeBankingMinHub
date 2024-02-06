@@ -38,8 +38,11 @@ namespace HomeBankingMinHub.Controllers
                         Transactions = account.Transactions.Select(transaction => new TransactionDTO
                         {
                             Id = transaction.Id,
+                            Type = transaction.Type,
                             Amount = transaction.Amount,
+                            Description = transaction.Description,
                             Date = transaction.Date,
+
 
                         }).ToList()
                     };
@@ -75,7 +78,9 @@ namespace HomeBankingMinHub.Controllers
                         Id = transaction.Id,
                         Amount = transaction.Amount,
                         Date = transaction.Date,
-                        
+                        Type = transaction.Type,
+                        Description = transaction.Description,
+
                     }).ToList()
                 };
                 return Ok(accountDTO);
