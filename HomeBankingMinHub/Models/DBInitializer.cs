@@ -64,7 +64,7 @@
 
             if (!context.Loans.Any())
             {
-                //crearemos 3 prestamos Hipotecario, Personal y Automotriz
+                //crearemos  prestamos Hipotecario, Personal y Automotriz
                 var loans = new Loan[]
                 {
                     new Loan { Name = "Hipotecario", MaxAmount = 500000, Payments = "12,24,36,48,60" },
@@ -79,8 +79,8 @@
 
                 context.SaveChanges();
 
-                //ahora agregaremos los clientloan (Prestamos del cliente)
-                //usaremos al único cliente que tenemos y le agregaremos un préstamo de cada item
+                // agregaremos los clientloan 
+                
                 var client1 = context.Clients.FirstOrDefault(c => c.Email == "vcoronado@gmail.com");
                 if (client1 != null)
                 {
@@ -129,6 +129,44 @@
 
                 }
 
+            }
+
+            if (!context.Cards.Any())
+            {
+                var client1 = context.Clients.FirstOrDefault(c => c.Email == "vcoronado@gmail.com");
+                if (client1 != null)
+                {
+                    var cards = new Card[]
+                    {
+                        new Card {
+                            ClientId= client1.Id,
+                            NameCardHolder = client1.FirstName + " " + client1.LastName,
+                            Type = CardType.DEBIT.ToString(),
+                            Color = CardColor.GOLD.ToString(),
+                            Number = "3325-6745-7876-4445",
+                            Cvv = 990,
+                            FromDate= DateTime.Now,
+                            ThruDate= DateTime.Now.AddYears(4),
+                        },
+                        new Card {
+                            ClientId= client1.Id,
+                            NameCardHolder = client1.FirstName + " " + client1.LastName,
+                            Type = CardType.CREDIT.ToString(),
+                            Color = CardColor.TITANIUM.ToString(),
+                            Number = "2234-6745-552-7888",
+                            Cvv = 750,
+                            FromDate= DateTime.Now,
+                            ThruDate= DateTime.Now.AddYears(5),
+                        },
+                    };
+
+                    foreach (Card card in cards)
+                    {
+                        context.Cards.Add(card);
+                    }
+                    
+                }
+                context.SaveChanges();
             }
 
 
