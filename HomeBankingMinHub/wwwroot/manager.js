@@ -14,7 +14,7 @@ const app = new Vue({
             .then(function (response) {
                 // handle success
                 app.outPut = response.data;
-                app.clients = response.data.$values;;
+                app.clients = response.data;
             })
             .catch(function (error) {
                 // handle error
@@ -30,7 +30,7 @@ const app = new Vue({
         // code to post a new player using AJAX
         // on success, reload and display the updated data from the server
         postPlayer: function(email, firstName, lastName) {
-             axios.post("api/clients",{ "email":email, "firstName": firstName, "lastName": lastName })
+             axios.post("clients",{ "email":email, "firstName": firstName, "lastName": lastName })
             .then(function (response) {
                 // handle success
                 showOutput = "Saved -- reloading";
