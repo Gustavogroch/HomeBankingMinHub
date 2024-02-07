@@ -2,6 +2,7 @@
 using HomeBankingMinHub.Models;
 using HomeBankingMinHub.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HomeBankingMinHub.Controllers
 {
@@ -9,7 +10,7 @@ namespace HomeBankingMinHub.Controllers
     [ApiController]
     public class ClientsController : ControllerBase
     {
-        private IClientRepository _clientRepository;
+        public IClientRepository _clientRepository;
 
 
 
@@ -146,6 +147,32 @@ namespace HomeBankingMinHub.Controllers
 
                 return StatusCode(500, ex.Message);
 
+            }
+
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] ClientCreateDTO model)
+        {
+            if (model.Email.IsNullOrEmpty() || model.FirstName.IsNullOrEmpty() || model.LastName.IsNullOrEmpty())
+            {
+                return BadRequest("Se requieren todos los campos");
+            }
+            try
+            {
+                var client = new Client();
+                client.Email = model.Email;
+                client.FirstName = model.FirstName;
+                client.LastName = model.LastName;
+                client.Password = "141516";
+                _clientRepository.Save(client);
+                return Created();
+
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
         }
