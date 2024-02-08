@@ -15,6 +15,7 @@ builder.Services.AddDbContext<HomeBankingContext>(options => options.UseSqlServe
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
+builder.Services.AddAuthorization(options =>{options.AddPolicy("ClientOnly", policy => policy.RequireClaim("Client"));});
 
 //autenticación
 
@@ -43,11 +44,36 @@ using (var scope = app.Services.CreateScope())
     DBInitializer.Initialize(context);
 }
 
-// Configure the HTTP request pipeline.
+ //Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
+
 }
+
+/*if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}*/
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<HomeBankingContext>();
+        DBInitializer.Initialize(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ha ocurrido un error al enviar la información a la base de datos!");
+    }
+}
+
+app.UseAuthentication();
+
 app.UseDefaultFiles();
 
 app.UseStaticFiles();

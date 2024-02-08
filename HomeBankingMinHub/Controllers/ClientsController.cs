@@ -88,7 +88,7 @@ namespace HomeBankingMinHub.Controllers
                      Cards = client.Cards.Select(c => new CardDTO
                      {
                          Id = c.Id,
-                         NameCardHolder = c.NameCardHolder,
+                         CardHolder = c.NameCardHolder,
                          Color = c.Color,
                          Cvv = c.Cvv,
                          FromDate = c.FromDate,
@@ -125,6 +125,62 @@ namespace HomeBankingMinHub.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("current")]
+        public IActionResult GetCurrent()
+        {
+            try
+            {
+                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
+                if (email == string.Empty)
+                {
+                    return Forbid();
+                }
+                Client client = _clientRepository.FindByEmail(email);
+                if (client == null)
+                {
+                    return Forbid();
+                }
+                var clientDTO = new ClientDTO
+                {
+                    Id = client.Id,
+                    Email = client.Email,
+                    FirstName = client.FirstName,
+                    LastName = client.LastName,
+                    Accounts = client.Accounts.Select(ac => new AccountDTO
+                    {
+                        Id = ac.Id,
+                        Balance = ac.Balance,
+                        CreationDate = ac.CreationDate,
+                        Number = ac.Number
+                    }).ToList(),
+                    Credits = client.ClientLoans.Select(cl => new ClientLoanDTO
+                    {
+                        Id = cl.Id,
+                        LoanId = cl.LoanId,
+                        Name = cl.Loan.Name,
+                        Amount = cl.Amount,
+                        Payments = int.Parse(cl.Payments)
+                    }).ToList(),
+                    Cards = client.Cards.Select(c => new CardDTO
+                    {
+                        Id = c.Id,
+                        CardHolder = c.NameCardHolder,
+                        Color = c.Color,
+                        Cvv = c.Cvv,
+                        FromDate = c.FromDate,
+                        Number = c.Number,
+                        ThruDate = c.ThruDate,
+                        Type = c.Type
+                    }).ToList()
+                };
+                return Ok(clientDTO);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
             }
         }
     }
