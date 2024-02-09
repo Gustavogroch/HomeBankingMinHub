@@ -13,7 +13,7 @@ using HomeBankingMinHub.DTOs;
 
 namespace HomeBankingMindHub.Controllers
 {
-    [Route("api/auth")]
+    [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -22,15 +22,21 @@ namespace HomeBankingMindHub.Controllers
         {
             _clientRepository = clientRepository;
         }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] Client client)
+        
+       [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] ClientLoginRequestDTO client)
         {
             try
             {
+                if (string.IsNullOrEmpty(client.Email) || string.IsNullOrEmpty(client.Password))
+                    
+                {
+                    return BadRequest("Por favor, ingrese su correo electrónico y contraseña.");
+                }
+
                 Client user = _clientRepository.FindByEmail(client.Email);
                 if (user == null || !String.Equals(user.Password, client.Password))
-                    return Unauthorized();
+                    return Unauthorized("El correo electrónico o la contraseña son incorrectos. Por favor, vuelva a intentarlo.");
 
                 var claims = new List<Claim>
                 {
@@ -54,6 +60,7 @@ namespace HomeBankingMindHub.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
