@@ -35,7 +35,7 @@ namespace HomeBankingMindHub.Controllers
                 }
 
                 Client user = _clientRepository.FindByEmail(client.Email);
-                if (user == null || !String.Equals(user.Password, client.Password))
+                if (user == null || !String.Equals(user.Password, HashPassword.Hash(client.Password)))
                     return Unauthorized("El correo electrónico o la contraseña son incorrectos. Por favor, vuelva a intentarlo.");
 
                 var claims = new List<Claim>

@@ -1,5 +1,6 @@
 using HomeBankingMinHub.Models;
 using HomeBankingMinHub.Repositories;
+using HomeBankingMinHub.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -16,6 +17,7 @@ builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 builder.Services.AddAuthorization(options =>{options.AddPolicy("ClientOnly", policy => policy.RequireClaim("Client"));});
+builder.Services.AddScoped<AccountService>();
 
 //autenticación
 
@@ -74,6 +76,8 @@ using (var scope = app.Services.CreateScope())
 
 app.UseAuthentication();
 
+app.UseAuthorization();
+
 app.UseDefaultFiles();
 
 app.UseStaticFiles();
@@ -82,10 +86,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.MapControllers();
 
 app.MapRazorPages();
-
-app.MapControllers();
 
 app.Run();

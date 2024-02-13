@@ -1,6 +1,7 @@
 ﻿using HomeBankingMinHub.DTOs;
 using HomeBankingMinHub.Models;
 using HomeBankingMinHub.Repositories;
+using HomeBankingMinHub.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,10 +13,14 @@ namespace HomeBankingMinHub.Controllers
     public class AccountsController : ControllerBase
     {
         private IAccountRepository _AccountRepository;
+        private AccountService _AccountService;
+        private IClientRepository _ClientRepository;
 
-        public AccountsController(IAccountRepository AccountRepository)
+        public AccountsController(IAccountRepository AccountRepository, IClientRepository clientRepository, AccountService accountService)
         {
             _AccountRepository = AccountRepository;
+            _AccountService = accountService;
+            _ClientRepository = clientRepository;
 
         }
 
@@ -92,7 +97,57 @@ namespace HomeBankingMinHub.Controllers
             }
         }
 
-        
+        [HttpPost("/api/clients/current/accounts")]
+        public IActionResult CreateAccountForCurrentUser()
+        {
+            try
+            {
+                // Obtener la información del cliente autenticado
+                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
+                if (email == string.Empty)
+                {
+                    return Forbid();
+                }
+
+                // Buscar el cliente
+                Client client = _ClientRepository.FindByEmail(email);
+                if (client == null)
+                {
+                    return Forbid();
+                }
+
+                // Verificar si el cliente ya tiene 3 cuentas registradas
+                if (client.Accounts.Count >= 3)
+                {
+                    return StatusCode(403, "El cliente ya tiene 3 cuentas registradas");
+                }
+
+                // Generar un número de cuenta aleatorio y único usando el servicio
+                string accountNumber = _AccountService.GenerateUniqueAccountNumber();
+
+                // Crear la nueva cuenta
+                Account newAccount = new Account
+                {
+                    Number = accountNumber,
+                    CreationDate = DateTime.Now,
+                    Balance = 0,
+                    ClientId = client.Id,
+                    
+                };
+
+                // Guardar la cuenta en el repositorio
+                _AccountRepository.Save(newAccount);
+
+                return StatusCode(201, "Cuenta creada exitosamente");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+
 
 
     }

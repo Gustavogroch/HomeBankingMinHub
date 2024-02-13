@@ -112,13 +112,17 @@ namespace HomeBankingMinHub.Controllers
             {
                 return BadRequest("Se requieren todos los campos");
             }
+            if (_clientRepository.FindByEmail(model.Email) != null)
+            {
+                return BadRequest("El correo electrónico ya está en uso.");
+            }
             try
             {
                 var client = new Client();
                 client.Email = model.Email;
                 client.FirstName = model.FirstName;
                 client.LastName = model.LastName;
-                client.Password = "141516";
+                client.Password = HashPassword.Hash(model.Password); 
                 _clientRepository.Save(client);
                 return Created();
             }
