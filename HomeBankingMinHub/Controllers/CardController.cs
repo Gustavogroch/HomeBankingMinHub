@@ -42,12 +42,19 @@ namespace HomeBankingMinHub.Controllers
                     return Forbid();
                 }
 
+                var existingCard = _cardRepository.GetCardsByClient(client.Id, cardDTO.Type, cardDTO.Color).FirstOrDefault();
+                if (existingCard != null)
+                {
+                    return StatusCode(403, $"El cliente ya tiene una tarjeta de tipo {cardDTO.Type} y color {cardDTO.Color}");
+                }
 
-                int numberOfCards = _cardRepository.GetCardsByClient(client.Id, cardDTO.Type).Count();
+                int numberOfCards = _cardRepository.GetCardsByClient(client.Id, cardDTO.Type, cardDTO.Color).Count();
                 if (numberOfCards >= 3)
                 {
                     return StatusCode(403, $"El cliente ya tiene 3 tarjetas de tipo {cardDTO.Type}");
                 }
+
+                
                 string cardNumber = _cardService.GenerateCardNumber();
                 int cvv = _cardService.GenerateCvv();
                 var newCard = new Card

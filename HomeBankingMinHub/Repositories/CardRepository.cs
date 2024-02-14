@@ -18,9 +18,9 @@ namespace HomeBankingMinHub.Repositories
                 .FirstOrDefault();
         }
 
-        public IEnumerable<Card> GetCardsByClient(long clientId, string type)
+        public IEnumerable<Card> GetCardsByClient(long clientId, string type, string color)
         {
-            return FindByCondition(card => card.ClientId == clientId)
+            return FindByCondition(card => card.ClientId == clientId && card.Type == type && card.Color == color)
             .ToList();
         }
 
