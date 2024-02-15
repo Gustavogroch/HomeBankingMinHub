@@ -21,7 +21,15 @@ namespace HomeBankingMinHub.Repositories
         public void Save(Account account)
 
         {
-            Create(account);
+            if (account.Id == 0)
+            {
+                Create(account);
+            }
+            else
+            {
+                Update(account);
+            }
+
             SaveChanges();
         }
 
@@ -36,6 +44,13 @@ namespace HomeBankingMinHub.Repositories
         {
             var account = FindByCondition(a => a.Number == accountNumber).FirstOrDefault();
             return account != null;
+        }
+
+        public Account FinByNumber(string number)
+        {
+            return FindByCondition(account => account.Number.ToUpper() == number.ToUpper())
+            .Include(account => account.Transactions)
+            .FirstOrDefault();
         }
     }
 }

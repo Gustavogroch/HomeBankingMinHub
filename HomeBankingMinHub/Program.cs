@@ -1,5 +1,5 @@
-using HomeBankingMinHub.Models;
 using HomeBankingMinHub.Repositories;
+using HomeBankingMinHub.Models;
 using HomeBankingMinHub.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +20,7 @@ builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.Re
 builder.Services.AddAuthorization(options =>{options.AddPolicy("ClientOnly", policy => policy.RequireClaim("Client"));});
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<CardService>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
 //autenticación
 

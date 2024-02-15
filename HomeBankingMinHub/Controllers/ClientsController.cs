@@ -1,8 +1,10 @@
 ﻿using HomeBankingMinHub.DTOs;
 using HomeBankingMinHub.Models;
 using HomeBankingMinHub.Repositories;
+using HomeBankingMinHub.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.Net;
 
 namespace HomeBankingMinHub.Controllers
 {
@@ -11,9 +13,13 @@ namespace HomeBankingMinHub.Controllers
     public class ClientsController : ControllerBase
     {
         public IClientRepository _clientRepository;
-        public ClientsController(IClientRepository clientRepository)
+        private IAccountRepository _AccountRepository;
+        private AccountService _AccountService;
+        public ClientsController(IAccountRepository AccountRepository, IClientRepository clientRepository, AccountService accountService)
         {
             _clientRepository = clientRepository;
+            _AccountRepository = AccountRepository;
+            _AccountService = accountService;
         }
 
         [HttpGet]
@@ -48,8 +54,6 @@ namespace HomeBankingMinHub.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-
 
         [HttpGet("{id}")]
 
@@ -108,31 +112,57 @@ namespace HomeBankingMinHub.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] ClientCreateDTO model)
         {
-            if (model.Email.IsNullOrEmpty() || model.FirstName.IsNullOrEmpty() || model.LastName.IsNullOrEmpty())
-            {
-                return BadRequest("Se requieren todos los campos");
-            }
-            if (_clientRepository.FindByEmail(model.Email) != null)
-            {
-                return BadRequest("El correo electrónico ya está en uso.");
-            }
             try
             {
+                if (model.Email.IsNullOrEmpty() || model.FirstName.IsNullOrEmpty() || model.LastName.IsNullOrEmpty())
+                {
+                    return BadRequest("Se requieren todos los campos");
+                }
+                if (_clientRepository.FindByEmail(model.Email) != null)
+                {
+                    return BadRequest("El correo electrónico ya está en uso.");
+                }
+
                 var client = new Client();
                 client.Email = model.Email;
                 client.FirstName = model.FirstName;
                 client.LastName = model.LastName;
-                client.Password = HashPassword.Hash(model.Password); 
+                client.Password = HashPassword.Hash(model.Password);
                 _clientRepository.Save(client);
-                return Created();
+
+                var existingAccounts = _AccountRepository.GetAccountsByClient(client.Id);
+                if (existingAccounts.Count() == 0)
+
+                {
+                    // Generar un número de cuenta aleatorio y único usando el servicio
+                    string accountNumber = _AccountService.GenerateUniqueAccountNumber();
+
+                    // Crear la nueva cuenta
+                    Account newAccount = new Account
+                    {
+                        Number = accountNumber,
+                        CreationDate = DateTime.Now,
+                        Balance = 0,
+                        ClientId = client.Id,
+
+                    };
+
+                    // Guardar la cuenta en el repositorio
+                    _AccountRepository.Save(newAccount);
+
+                    return StatusCode(201, "Cuenta creada exitosamente");
+                }
+                { return Created(); 
+                }
+                
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
 
-        [HttpGet("current")]
+        [HttpGet("/api/clients/current")]
         public IActionResult GetCurrent()
         {
             try
@@ -187,6 +217,43 @@ namespace HomeBankingMinHub.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpGet("/api/clients/current/accounts")]
+        public IActionResult GetCurrentAccounts()
+        {
+            try
+            {
+                string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
+                if (email == string.Empty)
+                {
+                    return Forbid();
+                }
+                Client client = _clientRepository.FindByEmail(email);
+                if (client == null)
+                {
+                    return Forbid();
+                }
+                var accountDTOs = client.Accounts.Select(ac => new AccountDTO
+                {
+                    Id = ac.Id,
+                    Balance = ac.Balance,
+                    CreationDate = ac.CreationDate,
+                    Number = ac.Number
+                }).ToList();
+                return Ok(accountDTOs);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
     }
 }
+
+
+
+    
+
 

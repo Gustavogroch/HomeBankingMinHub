@@ -9,5 +9,7 @@ namespace HomeBankingMinHub.Repositories
         void Save(Account account);
         IEnumerable<Account> GetAccountsByClient(long clientId);
         bool Exists(string accountNumber);
+        Account FinByNumber(string number);
+
     }
 }
