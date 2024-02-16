@@ -46,7 +46,7 @@ namespace HomeBankingMinHub.Repositories
             return account != null;
         }
 
-        public Account FinByNumber(string number)
+        public Account FindByNumber(string number)
         {
             return FindByCondition(account => account.Number.ToUpper() == number.ToUpper())
             .Include(account => account.Transactions)

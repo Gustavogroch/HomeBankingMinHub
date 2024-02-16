@@ -45,11 +45,11 @@ namespace HomeBankingMinHub.Controllers
                 {
                     return Forbid("No se permite la transferencia a la misma cuenta.");
                 }
-                if (transferDTO.Amount == 0 || transferDTO.Description == string.Empty)
+                if (transferDTO.Amount <= 0 || transferDTO.Description == string.Empty)
                 {
                     return Forbid("Monto o descripcion no proporcionados.");
                 }
-                Account fromAccount = _accountRepository.FinByNumber(transferDTO.FromAccountNumber);
+                Account fromAccount = _accountRepository.FindByNumber(transferDTO.FromAccountNumber);
                 if (fromAccount == null)
                 {
                     return Forbid("Cuenta de origen no existe");
@@ -58,7 +58,7 @@ namespace HomeBankingMinHub.Controllers
                 {
                     return Forbid("Fondos insuficientes");
                 }
-                Account toAccount = _accountRepository.FinByNumber(transferDTO.ToAccountNumber);
+                Account toAccount = _accountRepository.FindByNumber(transferDTO.ToAccountNumber);
                 if (toAccount == null)
                 {
                     return Forbid("Cuenta de destino no existe");
