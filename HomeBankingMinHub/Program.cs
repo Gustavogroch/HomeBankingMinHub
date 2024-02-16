@@ -21,6 +21,8 @@ builder.Services.AddAuthorization(options =>{options.AddPolicy("ClientOnly", pol
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<CardService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<IClientLoanRepository, ClientLoanRepository>();
+builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 
 //autenticación
 
