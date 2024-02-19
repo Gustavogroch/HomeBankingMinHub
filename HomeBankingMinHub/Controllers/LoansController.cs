@@ -28,7 +28,8 @@ namespace HomeBankingMinHub.Controllers
             _clientRepository = clientRepository;
         }
 
-        public IActionResult Post(LoanApplicationDTO loanAppDto)
+        [HttpPost]
+        public IActionResult CreateLoan([FromBody] LoanApplicationDTO loanAppDto)
         {
             try
             {  //usuario autentificado
@@ -67,12 +68,12 @@ namespace HomeBankingMinHub.Controllers
                     return NotFound("La cuenta de destino especificada no existe.");
                 }
                 // Verificar que la cuenta de destino pertenezca al cliente autenticado
-                if (account.ClientId != int.Parse(User.Identity.Name))
+                if (account.ClientId != client.Id)
                 {
                     return Forbid("La cuenta de destino no pertenece al cliente autenticado.");
                 }
 
-                double totalamount = loanAppDto.Amount * 0.20;
+                double totalamount = loanAppDto.Amount * 1.20;
 
                 _clientLoanRepository.Save(new ClientLoan
                 {
@@ -87,7 +88,7 @@ namespace HomeBankingMinHub.Controllers
 
                     Type = TransactionType.CREDIT.ToString(),
                     Amount = loanAppDto.Amount,
-                    Description = loan.Name,
+                    Description = "Loan aproved " + loan.Name,
                     AccountId = account.Id,
                     Date = DateTime.Now,
                 });
@@ -107,6 +108,32 @@ namespace HomeBankingMinHub.Controllers
         
         }
 
+        [HttpGet]
+        public IActionResult Get()
+        {
+            try
+            {
+                var loans = _loanRepository.GetAllLoans();
+                var loanDTO = new List<LoanDTO>();
+                foreach (Loan loan in loans)
+                {
+                    var newLoanDTO = new LoanDTO
+                    {
+                        Id = loan.Id,
+                        Name = loan.Name,
+                        MaxAmount = loan.MaxAmount,
+                        Payments = loan.Payments,
+                        
+                    };
+                    loanDTO.Add(newLoanDTO);
+                }
+                return Ok(loanDTO);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
 
 
 
