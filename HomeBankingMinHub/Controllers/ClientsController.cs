@@ -15,44 +15,25 @@ namespace HomeBankingMinHub.Controllers
         public IClientRepository _clientRepository;
         private IAccountRepository _AccountRepository;
         private AccountService _AccountService;
-        public ClientsController(IAccountRepository AccountRepository, IClientRepository clientRepository, AccountService accountService)
+        private IClientService _clientService;
+
+        public ClientsController(IAccountRepository AccountRepository, IClientRepository clientRepository, AccountService accountService, IClientService clientService)
         {
             _clientRepository = clientRepository;
             _AccountRepository = AccountRepository;
             _AccountService = accountService;
+            _clientService = clientService;
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            try
-            {
-                var clients = _clientRepository.GetAllClients();
-                var clientsDTO = new List<ClientDTO>();
-                foreach (Client client in clients)
-                {
-                    var newClientDTO = new ClientDTO
-                    {
-                        Id = client.Id,
-                        Email = client.Email,
-                        FirstName = client.FirstName,
-                        LastName = client.LastName,
-                        Accounts = client.Accounts.Select(ac => new AccountDTO
-                        {
-                            Id = ac.Id,
-                            Balance = ac.Balance,
-                            CreationDate = ac.CreationDate,
-                            Number = ac.Number
-                        }).ToList()
-                    };
-                    clientsDTO.Add(newClientDTO);
-                }
-                return Ok(clientsDTO);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+
+            var clients = _clientService.GetAllClients();
+            if (clients == null) 
+            { return NotFound(); }
+
+            return Ok(clients);
         }
 
         [HttpGet("{id}")]
