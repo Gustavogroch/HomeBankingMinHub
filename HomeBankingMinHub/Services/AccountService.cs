@@ -1,8 +1,11 @@
-﻿using HomeBankingMinHub.Repositories;
+﻿using HomeBankingMinHub.DTOs;
+using HomeBankingMinHub.Models;
+using HomeBankingMinHub.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HomeBankingMinHub.Services
 {
-    public class AccountService
+    public class AccountService : IAccountService
     {
         private readonly IAccountRepository _accountRepository;
 
@@ -11,22 +14,68 @@ namespace HomeBankingMinHub.Services
             _accountRepository = accountRepository;
         }
 
-        public string GenerateUniqueAccountNumber()
-        {
-            string accountNumber;
-            do
-            {
-                accountNumber = GenerateAccountNumber();
-            }
-            while (_accountRepository.Exists(accountNumber));
+        
 
-            return accountNumber;
+        public IEnumerable<AccountDTO> Get()
+        {
+                var accounts = _accountRepository.GetAllAcounts();
+                if (accounts == null) { return null; }
+                var AccountDTO = new List<AccountDTO>();
+
+
+
+                foreach (Account account in accounts)
+                {
+
+                    var newAccountDTO = new AccountDTO
+                    {
+                        Id = account.Id,
+                        Number = account.Number,
+                        CreationDate = account.CreationDate,
+                        Balance = account.Balance,
+                        Transactions = account.Transactions.Select(transaction => new TransactionDTO
+                        {
+                            Id = transaction.Id,
+                            Type = transaction.Type,
+                            Amount = transaction.Amount,
+                            Description = transaction.Description,
+                            Date = transaction.Date,
+
+
+                        }).ToList()
+                    };
+                    AccountDTO.Add(newAccountDTO);
+
+                }
+                return AccountDTO;
+            
         }
 
-        private string GenerateAccountNumber()
+        public AccountDTO GetAccountById(long id)
         {
-            Random random = new Random();
-            return "VIN-" + random.Next(100000, 999999);
+                var account = _accountRepository.FindById(id);
+                if (account == null)
+                {
+                    return null;
+                }
+                var accountDTO = new AccountDTO
+                {
+                    Id = account.Id,
+                    Number = account.Number,
+                    CreationDate = account.CreationDate,
+                    Balance = account.Balance,
+                    Transactions = account.Transactions.Select(transaction => new TransactionDTO
+                    {
+                        Id = transaction.Id,
+                        Amount = transaction.Amount,
+                        Date = transaction.Date,
+                        Type = transaction.Type,
+                        Description = transaction.Description,
+
+                    }).ToList()
+                };
+                return accountDTO;
+
         }
     }
 

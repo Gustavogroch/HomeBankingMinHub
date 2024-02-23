@@ -13,88 +13,35 @@ namespace HomeBankingMinHub.Controllers
     public class AccountsController : ControllerBase
     {
         private IAccountRepository _AccountRepository;
-        private AccountService _AccountService;
+        private IAccountService _AccountService;
         private IClientRepository _ClientRepository;
+        private readonly GenerateAccountNumber _accountNumberGenerator;
 
-        public AccountsController(IAccountRepository AccountRepository, IClientRepository clientRepository, AccountService accountService)
+
+        public AccountsController(IAccountRepository AccountRepository, IClientRepository clientRepository, IAccountService accountService)
         {
             _AccountRepository = AccountRepository;
             _AccountService = accountService;
             _ClientRepository = clientRepository;
-
+            _accountNumberGenerator = new GenerateAccountNumber(AccountRepository);
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            try
-            {
-                var accounts = _AccountRepository.GetAllAcounts();
-                var AccountDTO = new List<AccountDTO>();
+            var account = _AccountService.Get();
+            if (account == null) 
+            { return NotFound("No se encontraron cuentas"); }
+            return Ok(account);
 
-                foreach (Account account in accounts)
-                {
-
-                    var newAccountDTO = new AccountDTO
-                    {
-                        Id = account.Id,
-                        Number = account.Number,
-                        CreationDate = account.CreationDate,
-                        Balance = account.Balance,
-                        Transactions = account.Transactions.Select(transaction => new TransactionDTO
-                        {
-                            Id = transaction.Id,
-                            Type = transaction.Type,
-                            Amount = transaction.Amount,
-                            Description = transaction.Description,
-                            Date = transaction.Date,
-
-
-                        }).ToList()
-                    };
-                    AccountDTO.Add(newAccountDTO);
-
-                }
-                return Ok(AccountDTO);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
 
         [HttpGet("{id}")]
         public IActionResult GetAccountById(long id)
         {
-            try
-            {
-                var account = _AccountRepository.FindById(id);
-                if (account == null)
-                {
-                    return NotFound();
-                }
-                var accountDTO = new AccountDTO
-                {
-                    Id = account.Id,
-                    Number = account.Number,
-                    CreationDate = account.CreationDate,
-                    Balance = account.Balance,
-                    Transactions = account.Transactions.Select(transaction => new TransactionDTO
-                    {
-                        Id = transaction.Id,
-                        Amount = transaction.Amount,
-                        Date = transaction.Date,
-                        Type = transaction.Type,
-                        Description = transaction.Description,
-
-                    }).ToList()
-                };
-                return Ok(accountDTO);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            var account = _AccountService.GetAccountById(id);
+            if (account == null) { return NotFound("no se encontro la cuenta"); }
+            return Ok(account);
         }
 
         [HttpPost("/api/clients/current/accounts")]
@@ -123,7 +70,7 @@ namespace HomeBankingMinHub.Controllers
                 }
 
                 // Generar un número de cuenta aleatorio y único usando el servicio
-                string accountNumber = _AccountService.GenerateUniqueAccountNumber();
+                string accountNumber = _accountNumberGenerator.GenerateUniqueAccountNumber();
 
                 // Crear la nueva cuenta
                 Account newAccount = new Account

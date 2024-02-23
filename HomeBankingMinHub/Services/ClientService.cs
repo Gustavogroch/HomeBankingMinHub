@@ -13,12 +13,15 @@ namespace HomeBankingMinHub.Services
         private readonly IClientRepository _clientRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly AccountService _accountService;
+        private readonly GenerateAccountNumber _accountNumberGenerator;
 
         public ClientService(IClientRepository clientRepository, IAccountRepository accountRepository, AccountService accountService)
         {
             _clientRepository = clientRepository;
             _accountRepository = accountRepository;
             _accountService = accountService;
+            _accountService = new AccountService(accountRepository);
+            _accountNumberGenerator = new GenerateAccountNumber(accountRepository);
         }
         public IEnumerable<ClientDTO> GetAllClients()
         {
@@ -113,7 +116,7 @@ namespace HomeBankingMinHub.Services
 
                 {
                     // Generar un número de cuenta aleatorio y único usando el servicio
-                    string accountNumber = _accountService.GenerateUniqueAccountNumber();
+                    string accountNumber = _accountNumberGenerator.GenerateUniqueAccountNumber();
                     // Crear la nueva cuenta
                     Account newAccount = new Account
                     {

@@ -15,6 +15,7 @@ builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<ICardRepository, CardRepository>();
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 builder.Services.AddAuthorization(options =>{options.AddPolicy("ClientOnly", policy => policy.RequireClaim("Client"));});
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<CardService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
