@@ -7,7 +7,8 @@ namespace HomeBankingMinHub.Services
     {
         public IEnumerable<AccountDTO> Get();
         public AccountDTO GetAccountById(long id);
+        public IActionResult CreateAccountForCurrentUser(string email);
 
 
-    }
+    }  
 }

@@ -46,9 +46,7 @@ namespace HomeBankingMinHub.Controllers
 
         [HttpPost("/api/clients/current/accounts")]
         public IActionResult CreateAccountForCurrentUser()
-        {
-            try
-            {
+        {          
                 // Obtener la información del cliente autenticado
                 string email = User.FindFirst("Client") != null ? User.FindFirst("Client").Value : string.Empty;
                 if (email == string.Empty)
@@ -56,45 +54,9 @@ namespace HomeBankingMinHub.Controllers
                     return Forbid();
                 }
 
-                // Buscar el cliente
-                Client client = _ClientRepository.FindByEmail(email);
-                if (client == null)
-                {
-                    return Forbid();
-                }
+            return _AccountService.CreateAccountForCurrentUser(email);
 
-                // Verificar si el cliente ya tiene 3 cuentas registradas
-                if (client.Accounts.Count >= 3)
-                {
-                    return StatusCode(403, "El cliente ya tiene 3 cuentas registradas");
-                }
-
-                // Generar un número de cuenta aleatorio y único usando el servicio
-                string accountNumber = _accountNumberGenerator.GenerateUniqueAccountNumber();
-
-                // Crear la nueva cuenta
-                Account newAccount = new Account
-                {
-                    Number = accountNumber,
-                    CreationDate = DateTime.Now,
-                    Balance = 0,
-                    ClientId = client.Id,
-                    
-                };
-
-                // Guardar la cuenta en el repositorio
-                _AccountRepository.Save(newAccount);
-
-                return StatusCode(201, "Cuenta creada exitosamente");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
         }
-
-
-
 
 
     }

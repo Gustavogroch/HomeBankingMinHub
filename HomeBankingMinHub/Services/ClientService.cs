@@ -12,7 +12,7 @@ namespace HomeBankingMinHub.Services
     {
         private readonly IClientRepository _clientRepository;
         private readonly IAccountRepository _accountRepository;
-        private readonly AccountService _accountService;
+        private readonly IAccountService _accountService;
         private readonly GenerateAccountNumber _accountNumberGenerator;
 
         public ClientService(IClientRepository clientRepository, IAccountRepository accountRepository, AccountService accountService)
@@ -20,7 +20,6 @@ namespace HomeBankingMinHub.Services
             _clientRepository = clientRepository;
             _accountRepository = accountRepository;
             _accountService = accountService;
-            _accountService = new AccountService(accountRepository);
             _accountNumberGenerator = new GenerateAccountNumber(accountRepository);
         }
         public IEnumerable<ClientDTO> GetAllClients()
